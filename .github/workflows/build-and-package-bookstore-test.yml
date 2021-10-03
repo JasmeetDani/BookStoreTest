@@ -1,0 +1,21 @@
+name: build-and-package-bookstore-test
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.x'
+    - name: AddSource
+      env: 
+        WHO_TO_TRUST: ${{ secrets.BOOKSTORELIBREFRESOLVE }} # BOOKSTORELIBREFRESOLVE is a repo level secret containing a PAT with only read: packages access
+      run: dotnet nuget add source --username ${{ github.repository_owner }} --password ${{ env.WHO_TO_TRUST  }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+    - name: Build
+      run: dotnet build --configuration Release
